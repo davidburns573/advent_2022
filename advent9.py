@@ -1,3 +1,5 @@
+import time
+
 def printMap(snake):
     for i in range(10, -10, -1):
         for j in range(-10, 10):
@@ -54,7 +56,8 @@ def solve():
                         if abs(H[0] - T[0]) == 1:
                             snake[j][0] += H[0] - T[0]
                 visited.add((snake[9][0], snake[9][1]))
-    
+        printMap(snake)
+        time.sleep(0.3)
     return len(visited)
 
     
