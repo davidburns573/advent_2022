@@ -5,18 +5,17 @@ def genList(str):
     while i < len(str):
         c = str[i]
         if c == '[':
-            newList = []
-            if len(stack) > 0:
-                stack[-1].append(newList)
-            stack.append(newList)
-            
+            stack.append(list())
         elif c == ']':
             l = stack.pop(-1)
+            if len(stack) > 0:
+                stack[-1].append(l)
         elif c != ',':
             j = i
             while str[i] not in "[],":
                 i+=1
             stack[-1].append(int(str[j:i]))
+            i-=1
         i += 1
     print(l)
     return l
