@@ -58,7 +58,7 @@ def bfs(g):
             for edge in g[curr[1]][0]:
                 queue.put((curr[0] + g[curr[1]][0][edge], edge))
 
-def recurse(g, time, curr, total, path):
+def recurse(g, time, curr, total, path, possiblePaths, extraPath):
     if time <= 0 or total == 0:
         return 0
     gain = 0
@@ -67,11 +67,25 @@ def recurse(g, time, curr, total, path):
         gain = g[curr][1] * time
     future = 0
     for edge in g[curr][0]:
-        if edge not in path:
+        if edge not in path and edge not in extraPath:
             path.append(edge)
-            future = max(future, recurse(g, time-g[curr][0][edge], edge, total - 1, path))
+            s = ' '.join(path)
+            if len(extraPath) == 0:
+                possiblePaths.add(s)
+            res = recurse(g, time-g[curr][0][edge], edge, total - 1, path, possiblePaths, extraPath)
+            future = max(future, res)
             path.pop(-1)
     return gain + future
+
+def runPath(g, path, time):
+    res = 0
+    prev = "AA"
+    for curr in path:
+        if curr != "AA":
+            time -= (g[prev][0][curr] + 1)
+            res += g[curr][1] * time
+            prev = curr
+    return res
 
 # DD -> BB -> JJ -> HH -> EE -> CC
 
@@ -94,7 +108,29 @@ def solve():
             edgesDict[e] = 1
         g[name] = [edgesDict, rate]
     optimize(g)
-    return(recurse(g, 30, "AA", len(g), ["AA"]))
+    allPaths = set()
+    recurse(g, 26, "AA", len(g), ["AA"], allPaths, [])
+    best = 0
+    count = 0
+    allPathsSorted = dict()
+    for path in allPaths:
+        pathL = path.split(" ")
+        pathL.sort()
+        spath = ' '.join(pathL)
+        res = runPath(g, path.split(" "), 26)
+        if spath in allPathsSorted:
+            if allPathsSorted[spath][1] < res:
+                allPathsSorted[spath] = [path.split(" "), res]
+        else:
+            allPathsSorted[spath] = [path.split(" "), res]
+    print(len(allPathsSorted))
+    for path in allPathsSorted:
+        pathL = allPathsSorted[path][0]
+        if count % 100 == 0:
+            print(count / 100, len(allPathsSorted)/100)
+        best = max(best, allPathsSorted[path][1] + recurse(g, 26, "AA", len(g), ["AA"], allPaths, pathL))
+        count += 1
+    return best
 
 print(solve())
 
